@@ -13,26 +13,54 @@ interface ExportButtonProps {
   filename?: string;
 }
 
+const formatPercent = (value?: number | null) => {
+  if (value === null || value === undefined || !Number.isFinite(value)) return 'N/A';
+  return `${(value * 100).toFixed(2)}%`;
+};
+
+const formatNumber = (value?: number | null, digits = 3) => {
+  if (value === null || value === undefined || !Number.isFinite(value)) return 'N/A';
+  return value.toFixed(digits);
+};
+
 export function ExportButton({ data, filename = 'bias-audit' }: ExportButtonProps) {
   const exportAsCSV = () => {
-    const headers = ['Demographic Group', 'Average Distance', 'Sample Count', 'Above Threshold', 'Status', 'Interpretation'];
-    
-    const rows = data.demographicDistances.map((d) => {
-      const interpretation = data.interpretation.find((i) => i.group === d.group);
-      return [
-        d.group,
-        d.averageDistance.toFixed(4),
-        d.sampleCount,
-        d.isAboveThreshold ? 'Yes' : 'No',
-        interpretation?.status || 'N/A',
-        `"${interpretation?.message || 'N/A'}"`,
-      ].join(',');
-    });
+    const headers = [
+      'Demographic Group',
+      'Samples',
+      'Identities',
+      'Detection Rate',
+      'Baseline FPR',
+      'Baseline FNR',
+      'Baseline Accuracy',
+      'Adaptive FPR',
+      'Adaptive FNR',
+      'Adaptive Accuracy',
+      'Adaptive Threshold',
+      'Look-Alike Risk Rate',
+    ];
+
+    const rows = data.groups.map((g) => [
+      g.group,
+      g.sampleCount,
+      g.identityCount,
+      formatPercent(g.detectionRate),
+      formatPercent(g.metrics?.fpr),
+      formatPercent(g.metrics?.fnr),
+      formatPercent(g.metrics?.accuracy),
+      formatPercent(g.mitigation?.fpr),
+      formatPercent(g.mitigation?.fnr),
+      formatPercent(g.mitigation?.accuracy),
+      formatNumber(g.mitigation?.threshold),
+      formatPercent(g.lookAlikeRisk?.rate),
+    ].join(','));
 
     const csv = [
       `Bias Audit Report - ${new Date().toLocaleDateString()}`,
-      `Overall Fairness Score: ${data.overallFairnessScore}%`,
-      `Threshold: ${data.threshold}`,
+      `Baseline Fairness Score: ${data.overall?.baselineScore ?? data.overallFairnessScore ?? 0}%`,
+      `Mitigated Fairness Score: ${data.overall?.mitigatedScore ?? 0}%`,
+      `Standard Threshold: ${data.thresholds.standard}`,
+      `Adaptive Strategy: ${data.thresholds.adaptiveStrategy}`,
       '',
       headers.join(','),
       ...rows,
@@ -47,7 +75,6 @@ export function ExportButton({ data, filename = 'bias-audit' }: ExportButtonProp
   };
 
   const exportAsPDF = () => {
-    // Create a printable HTML version
     const content = `
       <!DOCTYPE html>
       <html>
@@ -67,43 +94,48 @@ export function ExportButton({ data, filename = 'bias-audit' }: ExportButtonProp
       <body>
         <h1>Bias Audit Report</h1>
         <p>Generated: ${new Date().toLocaleString()}</p>
-        <p>Overall Fairness Score: <span class="score">${data.overallFairnessScore}%</span></p>
-        <p>Threshold: ${data.threshold}</p>
-        
-        <h2>Demographic Analysis</h2>
+        <p>Baseline Fairness Score: <span class="score">${data.overall?.baselineScore ?? data.overallFairnessScore ?? 0}%</span></p>
+        <p>Mitigated Fairness Score: <span class="score">${data.overall?.mitigatedScore ?? 0}%</span></p>
+        <p>Threshold: ${data.thresholds.standard}</p>
+        <p>Adaptive Strategy: ${data.thresholds.adaptiveStrategy}</p>
+
+        <h2>Per-Group Metrics</h2>
         <table>
           <thead>
             <tr>
               <th>Group</th>
-              <th>Avg Distance</th>
               <th>Samples</th>
-              <th>Status</th>
-              <th>Interpretation</th>
+              <th>Detection Rate</th>
+              <th>Baseline FPR</th>
+              <th>Baseline FNR</th>
+              <th>Baseline Accuracy</th>
+              <th>Adaptive FPR</th>
+              <th>Adaptive FNR</th>
+              <th>Adaptive Accuracy</th>
+              <th>Adaptive Threshold</th>
             </tr>
           </thead>
           <tbody>
-            ${data.demographicDistances.map((d) => {
-              const interpretation = data.interpretation.find((i) => i.group === d.group);
-              return `
+            ${data.groups.map((g) => `
                 <tr>
-                  <td>${d.group}</td>
-                  <td>${d.averageDistance.toFixed(4)}</td>
-                  <td>${d.sampleCount}</td>
-                  <td class="${d.isAboveThreshold ? 'success' : 'warning'}">
-                    ${d.isAboveThreshold ? 'Above' : 'Below'} threshold
-                  </td>
-                  <td>${interpretation?.message || 'N/A'}</td>
+                  <td>${g.group}</td>
+                  <td>${g.sampleCount}</td>
+                  <td>${formatPercent(g.detectionRate)}</td>
+                  <td>${formatPercent(g.metrics?.fpr)}</td>
+                  <td>${formatPercent(g.metrics?.fnr)}</td>
+                  <td>${formatPercent(g.metrics?.accuracy)}</td>
+                  <td>${formatPercent(g.mitigation?.fpr)}</td>
+                  <td>${formatPercent(g.mitigation?.fnr)}</td>
+                  <td>${formatPercent(g.mitigation?.accuracy)}</td>
+                  <td>${formatNumber(g.mitigation?.threshold)}</td>
                 </tr>
-              `;
-            }).join('')}
+              `).join('')}
           </tbody>
         </table>
-        
+
         <h2>Important Notes</h2>
         <ul>
-          <li>Cosine distance interpretation applies primarily to same-demographic comparisons.</li>
-          <li>Cross-demographic distances do not directly imply bias.</li>
-          <li>Higher distance values indicate better distinguishability within a demographic group.</li>
+          ${(data.notes || []).map((note) => `<li>${note}</li>`).join('')}
         </ul>
       </body>
       </html>

@@ -6,10 +6,10 @@ import type { ApiResponse, FaceAnalysisResult } from './types';
 
 /**
  * Analyze a face image to detect faces and generate embeddings
- * 
+ *
  * @param imageFile - The image file to analyze
  * @returns Promise with face analysis results including detection status and embedding info
- * 
+ *
  * Integration Notes:
  * - This function sends the image to the Flask API
  * - The backend uses DeepFace with ArcFace model for embedding generation
@@ -39,19 +39,7 @@ export async function analyzeFace(imageFile: File): Promise<ApiResponse<FaceAnal
     const data = await response.json();
     return { success: true, data };
   } catch (error) {
-    // For demo purposes, return mock data when API is unavailable
-    console.warn('API unavailable, using mock data:', error);
-    
-    return {
-      success: true,
-      data: {
-        faceDetected: true,
-        embeddingSize: 512,
-        modelUsed: 'ArcFace',
-        processingTime: 1.23,
-        boundingBox: { x: 100, y: 80, width: 200, height: 250 },
-        confidence: 0.98,
-      },
-    };
+    const message = error instanceof Error ? error.message : 'An error occurred';
+    return { success: false, error: message };
   }
 }

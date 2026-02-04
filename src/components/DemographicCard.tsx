@@ -2,14 +2,14 @@ import { cn } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface DemographicCardProps {
-  group: 'African' | 'Asian' | 'Caucasian' | 'Indian';
+  group: string;
   distance: number;
   isHighlighted?: boolean;
   threshold?: number;
   className?: string;
 }
 
-const groupColors = {
+const groupColors: Record<string, { bg: string; border: string; text: string; glow: string }> = {
   African: {
     bg: 'bg-demographic-african/10',
     border: 'border-demographic-african/30',
@@ -36,6 +36,13 @@ const groupColors = {
   },
 };
 
+const fallbackColors = {
+  bg: 'bg-muted/40',
+  border: 'border-border',
+  text: 'text-foreground',
+  glow: 'shadow-[0_0_20px_hsl(var(--foreground)/0.08)]',
+};
+
 export function DemographicCard({
   group,
   distance,
@@ -43,7 +50,7 @@ export function DemographicCard({
   threshold = 0.68,
   className,
 }: DemographicCardProps) {
-  const colors = groupColors[group];
+  const colors = groupColors[group] || fallbackColors;
   const isAboveThreshold = distance >= threshold;
 
   return (

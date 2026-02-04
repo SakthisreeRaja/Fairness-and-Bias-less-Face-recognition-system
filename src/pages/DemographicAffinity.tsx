@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { Users, AlertCircle, Info } from 'lucide-react';
+import { Users, AlertCircle, Info, ShieldCheck } from 'lucide-react';
 import { AppLayout } from '@/components/AppLayout';
 import { ImageUploader } from '@/components/ImageUploader';
 import { DemographicCard } from '@/components/DemographicCard';
@@ -73,8 +73,8 @@ export default function DemographicAffinity() {
           <AlertTitle>Important Disclaimer</AlertTitle>
           <AlertDescription>
             This system does <strong>NOT</strong> classify race. It reports similarity trends from face embeddings
-            by comparing against reference demographic datasets sourced from public data or realistic simulators.
-            The results indicate embedding similarity patterns, not racial identity or classification.
+            by comparing against reference demographic datasets. The results indicate embedding similarity patterns,
+            not racial identity. Group labels are evaluation proxies and can be extended.
           </AlertDescription>
         </Alert>
 
@@ -165,10 +165,33 @@ export default function DemographicAffinity() {
                     group={d.group}
                     distance={d.averageDistance}
                     isHighlighted={d.group === result.predictedGroup}
+                    threshold={d.threshold}
                   />
                 ))}
               </div>
             </div>
+
+            {result.referenceDecision && (
+              <Card className="glass">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <ShieldCheck className="w-5 h-5 text-primary" />
+                    Reference Threshold Context
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="text-sm text-muted-foreground space-y-2">
+                  <p>Threshold: {result.referenceDecision.threshold.toFixed(3)}</p>
+                  <p>Threshold Source: {result.referenceDecision.thresholdSource}</p>
+                  <p>
+                    Within Threshold: {result.referenceDecision.withinThreshold ? 'Yes' : 'No'}
+                  </p>
+                  {result.referenceDecision.note && <p>{result.referenceDecision.note}</p>}
+                  {result.preprocessing?.applied && (
+                    <p>Preprocessing: {result.preprocessing.method} ({result.preprocessing.variant})</p>
+                  )}
+                </CardContent>
+              </Card>
+            )}
 
             {/* Disclaimer Card */}
             <Card className="glass">

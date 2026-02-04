@@ -1,5 +1,5 @@
-import { useState, useCallback } from 'react';
-import { CheckCircle, Box, Cpu, Clock, AlertCircle } from 'lucide-react';
+import { useState, useCallback, useMemo } from 'react';
+import { CheckCircle, Box, Cpu, Clock, AlertCircle, Sun, Sparkles } from 'lucide-react';
 import { AppLayout } from '@/components/AppLayout';
 import { ImageUploader } from '@/components/ImageUploader';
 import { AnalysisCard } from '@/components/AnalysisCard';
@@ -51,6 +51,18 @@ export default function FaceAnalysis() {
     setResult(null);
     setError(null);
   }, []);
+
+  const illuminationLabel = useMemo(() => {
+    if (!result?.illumination?.bucket) return 'Unknown';
+    const bucket = result.illumination.bucket;
+    return bucket.charAt(0).toUpperCase() + bucket.slice(1);
+  }, [result]);
+
+  const illuminationDescription = useMemo(() => {
+    const mean = result?.illumination?.meanLuminance;
+    if (mean === undefined || mean === null) return 'No luminance estimate available';
+    return `Mean luminance: ${mean.toFixed(1)}`;
+  }, [result]);
 
   return (
     <AppLayout title="Pipeline: Embedding">
@@ -128,7 +140,7 @@ export default function FaceAnalysis() {
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 stagger-children">
               <AnalysisCard
                 title="Face Detection"
-                value={result.faceDetected ? 'Detected ✓' : 'Not Found'}
+                value={result.faceDetected ? 'Detected' : 'Not Found'}
                 icon={<CheckCircle className="w-6 h-6" />}
                 status={result.faceDetected ? 'success' : 'danger'}
                 description="Face detection status"
@@ -158,6 +170,25 @@ export default function FaceAnalysis() {
                 description="Time to analyze"
               />
             </div>
+
+            {result.illumination && (
+              <div className="grid sm:grid-cols-2 gap-4">
+                <AnalysisCard
+                  title="Illumination"
+                  value={illuminationLabel}
+                  icon={<Sun className="w-6 h-6" />}
+                  status={illuminationLabel === 'Low' ? 'warning' : 'neutral'}
+                  description={illuminationDescription}
+                />
+                <AnalysisCard
+                  title="Preprocessing"
+                  value={result.preprocessing?.method || 'None'}
+                  icon={<Sparkles className="w-6 h-6" />}
+                  status={result.preprocessing?.applied ? 'success' : 'neutral'}
+                  description={`Variant: ${result.preprocessing?.variant || 'original'}`}
+                />
+              </div>
+            )}
 
             {result.confidence && (
               <div className="text-center p-4 rounded-xl glass">

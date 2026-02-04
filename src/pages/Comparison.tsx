@@ -1,15 +1,26 @@
 import { useState, useCallback } from 'react';
-import { GitCompare, CheckCircle, XCircle, AlertCircle, ArrowLeftRight } from 'lucide-react';
+import { GitCompare, CheckCircle, XCircle, AlertCircle, ArrowLeftRight, AlertTriangle, ShieldCheck } from 'lucide-react';
 import { AppLayout } from '@/components/AppLayout';
 import { ImageUploader } from '@/components/ImageUploader';
 import { ConfidenceRing } from '@/components/ConfidenceRing';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { compareFaces } from '@/api';
 import type { FaceComparisonResult } from '@/api/types';
 import { useHistory } from '@/hooks/useHistory';
 import { cn } from '@/lib/utils';
+
+const GROUP_OPTIONS = ['African', 'Asian', 'Caucasian', 'Indian'];
 
 export default function Comparison() {
   const [image1, setImage1] = useState<File | null>(null);
@@ -17,6 +28,8 @@ export default function Comparison() {
   const [isComparing, setIsComparing] = useState(false);
   const [result, setResult] = useState<FaceComparisonResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [useAdaptiveThreshold, setUseAdaptiveThreshold] = useState(false);
+  const [selectedGroup, setSelectedGroup] = useState<string>('');
   const { addEntry } = useHistory();
 
   const handleCompare = useCallback(async () => {
@@ -27,7 +40,10 @@ export default function Comparison() {
     setResult(null);
 
     try {
-      const response = await compareFaces(image1, image2);
+      const response = await compareFaces(image1, image2, {
+        useAdaptiveThreshold,
+        group: selectedGroup || undefined,
+      });
       
       if (response.success && response.data) {
         setResult(response.data);
@@ -45,7 +61,7 @@ export default function Comparison() {
     } finally {
       setIsComparing(false);
     }
-  }, [image1, image2, addEntry]);
+  }, [image1, image2, addEntry, useAdaptiveThreshold, selectedGroup]);
 
   const handleClear = useCallback(() => {
     setImage1(null);
@@ -137,6 +153,46 @@ export default function Comparison() {
           </div>
         </div>
 
+        {/* Threshold Options */}
+        <Card className="glass">
+          <CardHeader>
+            <CardTitle>Threshold Options</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col md:flex-row gap-4 md:items-center md:justify-between">
+              <div className="flex items-center gap-3">
+                <Switch
+                  id="adaptive-threshold"
+                  checked={useAdaptiveThreshold}
+                  onCheckedChange={setUseAdaptiveThreshold}
+                />
+                <Label htmlFor="adaptive-threshold">Use adaptive (group-aware) threshold</Label>
+              </div>
+              <Select value={selectedGroup} onValueChange={setSelectedGroup}>
+                <SelectTrigger className="w-full md:w-56">
+                  <SelectValue placeholder="Select subject group" />
+                </SelectTrigger>
+                <SelectContent>
+                  {GROUP_OPTIONS.map((group) => (
+                    <SelectItem key={group} value={group}>
+                      {group}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              Adaptive thresholds are calibrated during the fairness audit. Select a group to apply the
+              group-specific threshold for decision-level mitigation.
+            </p>
+            {useAdaptiveThreshold && !selectedGroup && (
+              <p className="text-xs text-status-warning mt-2">
+                Select a group to apply adaptive thresholds; otherwise the standard threshold is used.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
         {/* Compare Button */}
         {image1 && image2 && !result && (
           <div className="flex justify-center">
@@ -179,6 +235,27 @@ export default function Comparison() {
         {/* Results */}
         {result && (
           <div className="space-y-6 animate-fade-in-up">
+            {result.warnings && result.warnings.length > 0 && (
+              <div className="flex items-start gap-3 p-4 rounded-lg bg-status-warning/10 border border-status-warning/30 text-status-warning">
+                <AlertTriangle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                <div className="text-sm">
+                  {result.warnings.map((warning, index) => (
+                    <p key={index}>{warning}</p>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {result.twinLookAlikeRisk?.flag && (
+              <div className="flex items-start gap-3 p-4 rounded-lg bg-status-danger/10 border border-status-danger/30 text-status-danger">
+                <ShieldCheck className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                <div className="text-sm">
+                  <p className="font-medium">Look-alike risk detected</p>
+                  <p>{result.twinLookAlikeRisk.note}</p>
+                </div>
+              </div>
+            )}
+
             {/* Match Result Card */}
             <Card className={cn(
               'glass overflow-hidden',
@@ -226,7 +303,7 @@ export default function Comparison() {
                     <ConfidenceRing
                       value={result.confidence}
                       size={120}
-                      label="Confidence"
+                      label="Calibrated Confidence"
                     />
                   </div>
                 </div>
@@ -239,18 +316,23 @@ export default function Comparison() {
                 <CardTitle>Comparison Details</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid sm:grid-cols-3 gap-4 text-center">
+                <div className="grid sm:grid-cols-4 gap-4 text-center">
                   <div className="p-4 rounded-lg bg-muted/50">
                     <p className="text-sm text-muted-foreground mb-1">Cosine Similarity</p>
                     <p className="text-2xl font-bold">{result.cosineSimilarity.toFixed(4)}</p>
                   </div>
                   <div className="p-4 rounded-lg bg-muted/50">
-                    <p className="text-sm text-muted-foreground mb-1">Processing Time</p>
-                    <p className="text-2xl font-bold">{result.processingTime.toFixed(2)}s</p>
+                    <p className="text-sm text-muted-foreground mb-1">Distance</p>
+                    <p className="text-2xl font-bold">{result.distance?.toFixed(4) ?? 'N/A'}</p>
                   </div>
                   <div className="p-4 rounded-lg bg-muted/50">
-                    <p className="text-sm text-muted-foreground mb-1">Verdict Confidence</p>
-                    <p className="text-2xl font-bold">{(result.confidence * 100).toFixed(1)}%</p>
+                    <p className="text-sm text-muted-foreground mb-1">Threshold</p>
+                    <p className="text-2xl font-bold">{result.threshold?.toFixed(3) ?? 'N/A'}</p>
+                    <p className="text-xs text-muted-foreground">{result.thresholdSource || 'standard'}</p>
+                  </div>
+                  <div className="p-4 rounded-lg bg-muted/50">
+                    <p className="text-sm text-muted-foreground mb-1">Processing Time</p>
+                    <p className="text-2xl font-bold">{result.processingTime.toFixed(2)}s</p>
                   </div>
                 </div>
               </CardContent>

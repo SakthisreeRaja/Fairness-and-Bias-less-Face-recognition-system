@@ -6,41 +6,39 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  ReferenceLine,
   ResponsiveContainer,
-  Cell,
+  Legend,
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import type { DemographicDistance } from '@/api/types';
+import type { GroupAuditResult } from '@/api/types';
 
 interface FairnessChartProps {
-  data: DemographicDistance[];
-  threshold?: number;
+  data: GroupAuditResult[];
+  mode?: 'baseline' | 'mitigated';
   title?: string;
   description?: string;
 }
 
-const groupColors = {
-  African: 'hsl(25, 95%, 53%)',
-  Asian: 'hsl(45, 93%, 47%)',
-  Caucasian: 'hsl(199, 89%, 48%)',
-  Indian: 'hsl(142, 71%, 45%)',
-};
-
 export function FairnessChart({
   data,
-  threshold = 0.68,
-  title = 'Demographic Fairness Analysis',
-  description = 'Average cosine distance per demographic group',
+  mode = 'baseline',
+  title = 'Error Rates by Group',
+  description = 'False match (FPR) and false non-match (FNR) rates at the chosen threshold',
 }: FairnessChartProps) {
-  const chartData = useMemo(() => 
-    data.map((item) => ({
-      name: item.group,
-      distance: item.averageDistance,
-      samples: item.sampleCount,
-      isAboveThreshold: item.isAboveThreshold,
-    })),
-    [data]
+  const chartData = useMemo(() =>
+    data.map((item) => {
+      const metrics = mode === 'mitigated' ? item.mitigation : item.metrics;
+      return {
+        name: item.group,
+        fpr: metrics?.fpr ?? 0,
+        fnr: metrics?.fnr ?? 0,
+        accuracy: metrics?.accuracy ?? 0,
+        balanced: metrics?.balancedAccuracy ?? 0,
+        samples: item.sampleCount,
+        identities: item.identityCount,
+      };
+    }),
+    [data, mode]
   );
 
   const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ payload: typeof chartData[0] }> }) => {
@@ -50,13 +48,19 @@ export function FairnessChart({
         <div className="glass rounded-lg p-3 shadow-lg border border-border">
           <p className="font-semibold text-foreground">{item.name}</p>
           <p className="text-sm text-muted-foreground">
-            Distance: <span className="text-foreground font-medium">{item.distance.toFixed(4)}</span>
+            FPR: <span className="text-foreground font-medium">{(item.fpr * 100).toFixed(2)}%</span>
           </p>
           <p className="text-sm text-muted-foreground">
-            Samples: <span className="text-foreground font-medium">{item.samples}</span>
+            FNR: <span className="text-foreground font-medium">{(item.fnr * 100).toFixed(2)}%</span>
           </p>
-          <p className={`text-xs mt-1 ${item.isAboveThreshold ? 'text-status-success' : 'text-status-warning'}`}>
-            {item.isAboveThreshold ? '✓ Above threshold' : '⚠ Below threshold'}
+          <p className="text-sm text-muted-foreground">
+            Accuracy: <span className="text-foreground font-medium">{(item.accuracy * 100).toFixed(1)}%</span>
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Balanced Accuracy: <span className="text-foreground font-medium">{(item.balanced * 100).toFixed(1)}%</span>
+          </p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Samples: {item.samples} | Identities: {item.identities}
           </p>
         </div>
       );
@@ -77,61 +81,28 @@ export function FairnessChart({
               data={chartData}
               margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
             >
-              <CartesianGrid 
-                strokeDasharray="3 3" 
+              <CartesianGrid
+                strokeDasharray="3 3"
                 stroke="hsl(var(--border))"
                 opacity={0.3}
               />
-              <XAxis 
-                dataKey="name" 
+              <XAxis
+                dataKey="name"
                 stroke="hsl(var(--muted-foreground))"
                 fontSize={12}
               />
-              <YAxis 
+              <YAxis
                 stroke="hsl(var(--muted-foreground))"
                 fontSize={12}
                 domain={[0, 1]}
-                tickFormatter={(value) => value.toFixed(2)}
+                tickFormatter={(value) => `${Math.round(value * 100)}%`}
               />
               <Tooltip content={<CustomTooltip />} />
-              <ReferenceLine 
-                y={threshold} 
-                stroke="hsl(var(--status-danger))"
-                strokeDasharray="5 5"
-                strokeWidth={2}
-                label={{
-                  value: `Threshold (${threshold})`,
-                  position: 'right',
-                  fill: 'hsl(var(--status-danger))',
-                  fontSize: 11,
-                }}
-              />
-              <Bar 
-                dataKey="distance" 
-                radius={[8, 8, 0, 0]}
-                maxBarSize={60}
-              >
-                {chartData.map((entry, index) => (
-                  <Cell 
-                    key={`cell-${index}`} 
-                    fill={groupColors[entry.name as keyof typeof groupColors]}
-                  />
-                ))}
-              </Bar>
+              <Legend />
+              <Bar dataKey="fpr" fill="hsl(var(--status-danger))" name="FPR" radius={[6, 6, 0, 0]} />
+              <Bar dataKey="fnr" fill="hsl(var(--status-warning))" name="FNR" radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
-        </div>
-        
-        <div className="mt-4 flex flex-wrap gap-4 justify-center">
-          {Object.entries(groupColors).map(([group, color]) => (
-            <div key={group} className="flex items-center gap-2">
-              <div 
-                className="w-3 h-3 rounded-full"
-                style={{ backgroundColor: color }}
-              />
-              <span className="text-sm text-muted-foreground">{group}</span>
-            </div>
-          ))}
         </div>
       </CardContent>
     </Card>
