@@ -11,7 +11,7 @@ import type { ApiResponse, FairnessAuditResult } from './types';
  * @returns Promise with fairness audit results including demographic distances
  * 
  * Integration Notes:
- * - This function sends images to Firebase Functions for batch processing
+ * - This function calls the Flask API for batch processing
  * - The backend calculates average cosine distances per demographic group
  * - Threshold of 0.68 is used to determine bias levels
  * - Higher distances indicate less bias (more distinguishable embeddings)
@@ -70,6 +70,11 @@ export async function runFairnessAudit(imageFiles?: File[]): Promise<ApiResponse
           { group: 'Caucasian', status: 'low_bias', message: 'Distance well above threshold indicates excellent distinguishability.' },
           { group: 'Indian', status: 'low_bias', message: 'Distance at threshold level indicates acceptable distinguishability.' },
         ],
+        evaluationPlan: {
+          metrics: ['FMR', 'FNMR', 'TPR parity', 'EER', 'ROC-AUC'],
+          baselines: ['ArcFace baseline', 'ArcFace with adaptive thresholds'],
+          dataset: 'Local reference sets in backend/dataset',
+        },
       },
     };
   }

@@ -13,7 +13,7 @@ interface ExportButtonProps {
   filename?: string;
 }
 
-export function ExportButton({ data, filename = 'fairness-audit' }: ExportButtonProps) {
+export function ExportButton({ data, filename = 'bias-audit' }: ExportButtonProps) {
   const exportAsCSV = () => {
     const headers = ['Demographic Group', 'Average Distance', 'Sample Count', 'Above Threshold', 'Status', 'Interpretation'];
     
@@ -30,7 +30,7 @@ export function ExportButton({ data, filename = 'fairness-audit' }: ExportButton
     });
 
     const csv = [
-      `Fairness Audit Report - ${new Date().toLocaleDateString()}`,
+      `Bias Audit Report - ${new Date().toLocaleDateString()}`,
       `Overall Fairness Score: ${data.overallFairnessScore}%`,
       `Threshold: ${data.threshold}`,
       '',
@@ -52,7 +52,7 @@ export function ExportButton({ data, filename = 'fairness-audit' }: ExportButton
       <!DOCTYPE html>
       <html>
       <head>
-        <title>Fairness Audit Report</title>
+        <title>Bias Audit Report</title>
         <style>
           body { font-family: Arial, sans-serif; padding: 40px; }
           h1 { color: #3B82F6; }
@@ -65,7 +65,7 @@ export function ExportButton({ data, filename = 'fairness-audit' }: ExportButton
         </style>
       </head>
       <body>
-        <h1>Fairness Audit Report</h1>
+        <h1>Bias Audit Report</h1>
         <p>Generated: ${new Date().toLocaleString()}</p>
         <p>Overall Fairness Score: <span class="score">${data.overallFairnessScore}%</span></p>
         <p>Threshold: ${data.threshold}</p>
@@ -90,7 +90,7 @@ export function ExportButton({ data, filename = 'fairness-audit' }: ExportButton
                   <td>${d.averageDistance.toFixed(4)}</td>
                   <td>${d.sampleCount}</td>
                   <td class="${d.isAboveThreshold ? 'success' : 'warning'}">
-                    ${d.isAboveThreshold ? '✓ Above' : '⚠ Below'} threshold
+                    ${d.isAboveThreshold ? 'Above' : 'Below'} threshold
                   </td>
                   <td>${interpretation?.message || 'N/A'}</td>
                 </tr>

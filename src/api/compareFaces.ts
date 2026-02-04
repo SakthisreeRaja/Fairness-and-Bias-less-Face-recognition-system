@@ -12,7 +12,7 @@ import type { ApiResponse, FaceComparisonResult } from './types';
  * @returns Promise with comparison results including similarity score and match verdict
  * 
  * Integration Notes:
- * - Sends both images to Firebase Functions for embedding generation
+ * - Sends both images to the Flask API for embedding generation
  * - Backend generates embeddings for both faces using ArcFace
  * - Calculates cosine similarity between the two embeddings
  * - Returns match/no-match verdict based on configurable threshold

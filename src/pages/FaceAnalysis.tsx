@@ -53,13 +53,16 @@ export default function FaceAnalysis() {
   }, []);
 
   return (
-    <AppLayout title="Face Analysis">
+    <AppLayout title="Pipeline: Embedding">
       <div className="max-w-4xl mx-auto space-y-8">
         {/* Header */}
         <div className="text-center">
-          <h1 className="text-3xl font-bold gradient-text mb-2">Face Analysis</h1>
+          <h1 className="text-3xl font-bold gradient-text mb-2">Embedding and Inference</h1>
           <p className="text-muted-foreground">
-            Upload a face image to detect faces and generate embeddings
+            Stage 2 of the pipeline: detect faces, generate ArcFace embeddings, and record hardware-friendly timings.
+          </p>
+          <p className="text-sm text-muted-foreground mt-2">
+            Uploaded images are processed transiently and deleted after inference.
           </p>
         </div>
 
@@ -69,7 +72,7 @@ export default function FaceAnalysis() {
             selectedImage={selectedImage}
             onImageSelect={setSelectedImage}
             onClear={handleClear}
-            label="Upload Face Image"
+            label="Upload Face Image for Embedding"
           />
 
           {selectedImage && !result && (
@@ -88,7 +91,7 @@ export default function FaceAnalysis() {
                 ) : (
                   <>
                     <Cpu className="w-5 h-5" />
-                    Analyze Face
+                    Generate Embedding
                   </>
                 )}
               </Button>

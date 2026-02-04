@@ -41,10 +41,10 @@ interface HistoryTableProps {
 }
 
 const typeLabels = {
-  analysis: 'Face Analysis',
-  audit: 'Fairness Audit',
-  affinity: 'Demographic Affinity',
-  comparison: 'Face Comparison',
+  analysis: 'Embedding',
+  audit: 'Bias Audit',
+  affinity: 'Reference Sets',
+  comparison: 'Baseline Compare',
 };
 
 const typeColors = {
@@ -93,10 +93,10 @@ export function HistoryTable({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Types</SelectItem>
-            <SelectItem value="analysis">Face Analysis</SelectItem>
-            <SelectItem value="audit">Fairness Audit</SelectItem>
-            <SelectItem value="affinity">Demographic Affinity</SelectItem>
-            <SelectItem value="comparison">Face Comparison</SelectItem>
+            <SelectItem value="analysis">Embedding</SelectItem>
+            <SelectItem value="audit">Bias Audit</SelectItem>
+            <SelectItem value="affinity">Reference Sets</SelectItem>
+            <SelectItem value="comparison">Baseline Compare</SelectItem>
           </SelectContent>
         </Select>
 
@@ -192,7 +192,7 @@ export function HistoryTable({
       )}
 
       <p className="text-xs text-muted-foreground text-center">
-        LocalStorage for demo purposes, upgradeable to Firebase Firestore for production.
+        LocalStorage for demo purposes; use secure, access-controlled storage in production.
       </p>
     </div>
   );

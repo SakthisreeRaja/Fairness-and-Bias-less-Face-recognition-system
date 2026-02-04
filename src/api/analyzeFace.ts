@@ -11,9 +11,9 @@ import type { ApiResponse, FaceAnalysisResult } from './types';
  * @returns Promise with face analysis results including detection status and embedding info
  * 
  * Integration Notes:
- * - This function sends the image to Firebase Functions
+ * - This function sends the image to the Flask API
  * - The backend uses DeepFace with ArcFace model for embedding generation
- * - Expected response includes face detection status and 512-dimension embedding size
+ * - Expected response includes face detection status and embedding size
  */
 export async function analyzeFace(imageFile: File): Promise<ApiResponse<FaceAnalysisResult>> {
   try {

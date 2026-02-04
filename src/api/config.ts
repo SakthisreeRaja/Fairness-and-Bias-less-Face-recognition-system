@@ -1,9 +1,8 @@
-// API Configuration for FaceFair AI
-// Replace these URLs with your actual Firebase Functions endpoints
+// API Configuration for FairFace Insight
+// Point to the local Flask API or your deployed backend
 
-// Base URL for API - replace with your Firebase Functions URL
-// Example: https://us-central1-your-project.cloudfunctions.net
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001/api';
+// Base URL for API
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
 // API Endpoints
 export const API_ENDPOINTS = {

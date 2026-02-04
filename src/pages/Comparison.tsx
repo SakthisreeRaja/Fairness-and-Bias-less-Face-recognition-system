@@ -55,13 +55,13 @@ export default function Comparison() {
   }, []);
 
   return (
-    <AppLayout title="Face Comparison">
+    <AppLayout title="Baseline Verification">
       <div className="max-w-5xl mx-auto space-y-8">
         {/* Header */}
         <div className="text-center">
-          <h1 className="text-3xl font-bold gradient-text mb-2">Face Comparison</h1>
+          <h1 className="text-3xl font-bold gradient-text mb-2">Baseline Verification</h1>
           <p className="text-muted-foreground">
-            Compare two faces to determine similarity and match confidence
+            Compare two faces as a baseline verification task for evaluation and reporting
           </p>
         </div>
 
@@ -154,7 +154,7 @@ export default function Comparison() {
               ) : (
                 <>
                   <GitCompare className="w-5 h-5" />
-                  Compare Faces
+                  Run Baseline Compare
                 </>
               )}
             </Button>
@@ -258,7 +258,7 @@ export default function Comparison() {
 
             <div className="flex justify-center">
               <Button variant="outline" onClick={handleClear}>
-                Compare New Faces
+                Compare New Pair
               </Button>
             </div>
           </div>

@@ -28,12 +28,12 @@ import {
 } from '@/components/ui/sidebar';
 
 const navigationItems = [
-  { title: 'Home', url: '/', icon: Home },
-  { title: 'Face Analysis', url: '/analysis', icon: ScanFace },
-  { title: 'Fairness Audit', url: '/audit', icon: BarChart3 },
-  { title: 'Demographic Affinity', url: '/affinity', icon: Users },
-  { title: 'Comparison', url: '/comparison', icon: GitCompare },
-  { title: 'History', url: '/history', icon: History },
+  { title: 'Overview', url: '/', icon: Home },
+  { title: 'Pipeline', url: '/analysis', icon: ScanFace },
+  { title: 'Bias Audit', url: '/audit', icon: BarChart3 },
+  { title: 'Reference Sets', url: '/affinity', icon: Users },
+  { title: 'Baseline Compare', url: '/comparison', icon: GitCompare },
+  { title: 'Experiment Log', url: '/history', icon: History },
 ];
 
 export function AppSidebar() {
@@ -58,8 +58,8 @@ export function AppSidebar() {
           </div>
           {!isCollapsed && (
             <div className="flex flex-col">
-              <span className="font-bold text-lg gradient-text">FaceFair</span>
-              <span className="text-xs text-muted-foreground">AI Analysis</span>
+              <span className="font-bold text-lg gradient-text">FairFace Insight</span>
+              <span className="text-xs text-muted-foreground">Fairness Pipeline</span>
             </div>
           )}
         </div>

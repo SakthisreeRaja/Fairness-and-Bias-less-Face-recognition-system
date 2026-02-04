@@ -28,13 +28,13 @@ export default function History() {
   }, [clearHistory]);
 
   return (
-    <AppLayout title="History Log">
+    <AppLayout title="Experiment Log">
       <div className="max-w-6xl mx-auto space-y-8">
         {/* Header */}
         <div className="text-center">
-          <h1 className="text-3xl font-bold gradient-text mb-2">History Log</h1>
+          <h1 className="text-3xl font-bold gradient-text mb-2">Experiment Log</h1>
           <p className="text-muted-foreground">
-            View and manage your past face analyses and audits
+            Track reproducible runs across analysis, audits, and baseline comparisons
           </p>
         </div>
 

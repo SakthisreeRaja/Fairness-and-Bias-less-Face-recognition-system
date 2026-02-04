@@ -32,6 +32,12 @@ export interface FairnessAuditResult {
     status: 'low_bias' | 'moderate_bias' | 'high_bias';
     message: string;
   }[];
+  evaluationPlan?: {
+    metrics: string[];
+    baselines: string[];
+    dataset: string;
+  };
+  processingTime?: number;
 }
 
 export interface DemographicAffinityResult {

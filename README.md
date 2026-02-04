@@ -1,73 +1,73 @@
-# Welcome to your Lovable project
+# FairFace Insight
 
-## Project info
+FairFace Insight is an end-to-end, fairness-aware face recognition prototype designed to narrow the gap
+between academic research and practical deployment. The system covers data curation, algorithm design,
+privacy and security controls, bias auditing, and deployment guidance with reproducible metrics.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Highlights
+- End-to-end pipeline from dataset collection to deployment
+- Bias mitigation using adaptive thresholds and demographic audits
+- Clear evaluation metrics with baseline comparisons
+- Privacy-first processing with ephemeral uploads and report exports
 
-## How can I edit this code?
+## Project Structure
+- `backend/` Flask API for analysis, audits, and similarity checks
+- `backend/dataset/` Reference datasets grouped by demographic folders
+- `src/` React UI for pipeline execution, audits, and reports
 
-There are several ways of editing your application.
+## Running Locally
 
-**Use Lovable**
+### Backend
+1. Create and activate a Python virtual environment.
+2. Install dependencies.
+3. Start the API server.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+```bash
+pip install -r backend/requirements.txt
+python backend/app.py
+```
 
-Changes made via Lovable will be committed automatically to this repo.
+The API will run at `http://localhost:5000`.
 
-**Use your preferred IDE**
+### Frontend
+1. Install dependencies.
+2. Start the Vite dev server.
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+```bash
+npm install
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## Dataset Layout
+Place reference images under `backend/dataset/` using the group names below:
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```
+backend/dataset/
+  African/
+  Asian/
+  Caucasian/
+  Indian/
+```
 
-**Use GitHub Codespaces**
+## API Endpoints
+- `POST /api/analyze-face` Detect face and generate embeddings
+- `POST /api/compare-faces` Baseline verification between two faces
+- `POST /api/predict-demographic` Similarity to reference sets (not classification)
+- `POST /api/fairness-audit` Demographic audit with evaluation plan
+- `GET /api/health` Health check
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Evaluation and Baselines
+The audit pipeline documents metrics and baseline comparisons for reproducible reporting.
+Planned metrics include:
+- FMR (False Match Rate)
+- FNMR (False Non-Match Rate)
+- TPR parity
+- EER (Equal Error Rate)
+- ROC-AUC
 
-## What technologies are used for this project?
+Baselines include a standard ArcFace pipeline and an adaptive-threshold variant.
 
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## Privacy and Security
+- Uploaded images are processed in memory and deleted immediately after analysis.
+- The reference matching view reports similarity trends and does not classify race.
+- Add authentication and access controls for production deployments.

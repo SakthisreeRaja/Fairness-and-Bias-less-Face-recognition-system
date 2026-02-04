@@ -17,8 +17,8 @@ import type { ApiResponse, DemographicAffinityResult } from './types';
  * embedding is most similar to, NOT a racial classification.
  * 
  * Integration Notes:
- * - Sends image to Firebase Functions for embedding generation
- * - Backend compares embedding against pre-computed demographic reference sets
+ * - Sends image to the Flask API for embedding generation
+ * - Backend compares embedding against demographic reference sets
  * - Returns cosine distances to each demographic group's centroid
  */
 export async function predictDemographic(imageFile: File): Promise<ApiResponse<DemographicAffinityResult>> {

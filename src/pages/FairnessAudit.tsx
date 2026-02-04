@@ -29,7 +29,7 @@ export default function FairnessAudit() {
         
         addEntry({
           type: 'audit',
-          summary: `Fairness Score: ${response.data.overallFairnessScore}% - ${response.data.demographicDistances.length} groups analyzed`,
+          summary: `Bias Audit Score: ${response.data.overallFairnessScore}% - ${response.data.demographicDistances.length} groups analyzed`,
           result: response.data,
         });
       } else {
@@ -69,14 +69,14 @@ export default function FairnessAudit() {
   };
 
   return (
-    <AppLayout title="Fairness Audit">
+    <AppLayout title="Bias Audit">
       <div className="max-w-6xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold gradient-text mb-2">Fairness Audit Dashboard</h1>
+            <h1 className="text-3xl font-bold gradient-text mb-2">Bias Audit Dashboard</h1>
             <p className="text-muted-foreground">
-              Analyze demographic fairness across population groups
+              Evaluate demographic fairness, compare against baselines, and export reproducible reports
             </p>
           </div>
           
@@ -95,7 +95,7 @@ export default function FairnessAudit() {
               ) : (
                 <>
                   <BarChart3 className="w-4 h-4" />
-                  Run Audit
+                  Run Bias Audit
                 </>
               )}
             </Button>
@@ -188,6 +188,41 @@ export default function FairnessAudit() {
                 </div>
               </CardContent>
             </Card>
+
+            {result.evaluationPlan && (
+              <Card className="glass">
+                <CardHeader>
+                  <CardTitle>Evaluation Plan and Baselines</CardTitle>
+                  <CardDescription>
+                    Metrics and baseline comparisons used to quantify performance
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid sm:grid-cols-3 gap-6 text-sm">
+                    <div>
+                      <p className="text-muted-foreground mb-2">Metrics</p>
+                      <ul className="space-y-1">
+                        {result.evaluationPlan.metrics.map((metric) => (
+                          <li key={metric}>{metric}</li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground mb-2">Baselines</p>
+                      <ul className="space-y-1">
+                        {result.evaluationPlan.baselines.map((baseline) => (
+                          <li key={baseline}>{baseline}</li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground mb-2">Dataset</p>
+                      <p>{result.evaluationPlan.dataset}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
         )}
 
@@ -197,9 +232,9 @@ export default function FairnessAudit() {
             <div className="w-20 h-20 rounded-full gradient-primary-soft mx-auto mb-6 flex items-center justify-center">
               <BarChart3 className="w-10 h-10 text-primary" />
             </div>
-            <h2 className="text-2xl font-semibold mb-2">Ready to Analyze Fairness</h2>
+            <h2 className="text-2xl font-semibold mb-2">Ready to Run a Bias Audit</h2>
             <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-              Click "Run Audit" to analyze demographic fairness across population groups using the pre-trained model.
+              Click "Run Bias Audit" to analyze demographic fairness across population groups and document baseline metrics.
             </p>
             <Button
               onClick={handleRunAudit}
@@ -207,7 +242,7 @@ export default function FairnessAudit() {
               className="gradient-primary glow-primary gap-2"
             >
               <BarChart3 className="w-5 h-5" />
-              Run Fairness Audit
+              Run Bias Audit
             </Button>
           </div>
         )}

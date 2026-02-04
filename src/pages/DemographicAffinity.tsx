@@ -35,7 +35,7 @@ export default function DemographicAffinity() {
         addEntry({
           type: 'affinity',
           thumbnailUrl: URL.createObjectURL(selectedImage),
-          summary: `Closest affinity: ${response.data.predictedGroup} (${(response.data.confidenceScore * 100).toFixed(1)}% confidence)`,
+          summary: `Closest reference set: ${response.data.predictedGroup} (${(response.data.confidenceScore * 100).toFixed(1)}% confidence)`,
           result: response.data,
         });
       } else {
@@ -55,15 +55,15 @@ export default function DemographicAffinity() {
   }, []);
 
   return (
-    <AppLayout title="Demographic Affinity">
+    <AppLayout title="Reference Sets">
       <div className="max-w-5xl mx-auto space-y-8">
         {/* Header */}
         <div className="text-center">
           <h1 className="text-3xl font-bold gradient-text mb-2">
-            Similarity-Based Demographic Affinity
+            Reference Set Similarity
           </h1>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Analyze face embedding similarities across demographic reference sets
+            Compare embeddings against curated reference sets to diagnose potential demographic skews
           </p>
         </div>
 
@@ -72,9 +72,9 @@ export default function DemographicAffinity() {
           <Info className="h-4 w-4" />
           <AlertTitle>Important Disclaimer</AlertTitle>
           <AlertDescription>
-            This system does <strong>NOT</strong> classify race. It reports similarity trends from face embeddings 
-            by comparing against reference demographic datasets. The results indicate embedding similarity patterns, 
-            not racial identity or classification.
+            This system does <strong>NOT</strong> classify race. It reports similarity trends from face embeddings
+            by comparing against reference demographic datasets sourced from public data or realistic simulators.
+            The results indicate embedding similarity patterns, not racial identity or classification.
           </AlertDescription>
         </Alert>
 
@@ -84,7 +84,7 @@ export default function DemographicAffinity() {
             selectedImage={selectedImage}
             onImageSelect={setSelectedImage}
             onClear={handleClear}
-            label="Upload Test Face"
+            label="Upload Face for Reference Matching"
           />
 
           {selectedImage && !result && (
@@ -103,7 +103,7 @@ export default function DemographicAffinity() {
                 ) : (
                   <>
                     <Users className="w-5 h-5" />
-                    Analyze Affinity
+                    Run Reference Match
                   </>
                 )}
               </Button>
@@ -146,7 +146,7 @@ export default function DemographicAffinity() {
                     label="Confidence"
                   />
                   <div className="text-center">
-                    <p className="text-sm text-muted-foreground mb-1">Closest Affinity Group</p>
+                    <p className="text-sm text-muted-foreground mb-1">Closest Reference Set</p>
                     <p className="text-2xl font-bold gradient-text">{result.predictedGroup}</p>
                   </div>
                 </div>
@@ -156,7 +156,7 @@ export default function DemographicAffinity() {
             {/* Distance Cards */}
             <div>
               <h2 className="text-xl font-semibold mb-4 text-center">
-                Distance to Demographic Reference Sets
+                Distance to Reference Sets
               </h2>
               <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {result.distances.map((d) => (
